@@ -1,7 +1,6 @@
 package com.skillmanager.repository;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,8 +17,10 @@ public class SkillRepo {
     @Value("${skill.path}")
     private String skillPath;
 
-    public void StoreSkill(ZipInputStream zis) throws IOException {
+    public void StoreSkill(ZipInputStream zis, String skillName) throws IOException {
         Path baseDir = Paths.get(skillPath).toAbsolutePath().normalize();
+        Path skillDir = baseDir.resolve(skillName).normalize();
+
         Files.createDirectories(baseDir);
 
         ZipEntry entry;
@@ -28,18 +29,19 @@ public class SkillRepo {
                 continue;
             }
 
-            Path entryPath = baseDir.resolve(entry.getName()).normalize();
+            Path entryPath = entry.getName().startsWith(skillName) ? baseDir : skillDir;
+            entryPath = entryPath.resolve(entry.getName());
 
-            if (!entryPath.startsWith(baseDir)) {
+            if (!entryPath.startsWith(skillDir)) {
                 throw new IOException("ZIP-Eintrag verlässt das Zielverzeichnis: " + entry.getName());
             }
 
             Path zipEntryDir = entryPath.getParent();
             Files.createDirectories(zipEntryDir);
 
-            try (InputStream in = zis) {
-                Files.copy(in, entryPath, StandardCopyOption.REPLACE_EXISTING);
-            }
+            Files.copy(zis, entryPath, StandardCopyOption.REPLACE_EXISTING);
+
+            zis.closeEntry();
         }
     }
 }

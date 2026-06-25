@@ -25,8 +25,13 @@ public class SkillController {
     
     @PostMapping("/upload")
     public String uploadZip(@RequestParam("file") MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if(originalFilename == null || !originalFilename.endsWith(".zip")) {
+            return "Ungültige Datei. Bitte eine ZIP-Datei hochladen.";
+        }
+
         try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
-            skillRepo.StoreSkill(zis);
+            skillRepo.StoreSkill(zis, originalFilename.replace(".zip", ""));
             return "ZIP erfolgreich verarbeitet";
 
         } catch (IOException e) {
