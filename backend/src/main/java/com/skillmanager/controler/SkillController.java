@@ -1,6 +1,7 @@
 package com.skillmanager.controler;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.skillmanager.repository.SkillRepo;
 
 @RestController
@@ -25,8 +25,8 @@ public class SkillController {
     }
 
     @GetMapping
-    public String getSkills() {
-        return "SkillController is working!";
+    public Map<String, Map<String, String>> getSkills() throws Exception {
+            return skillRepo.getAllSkills();
     }
     
     @PostMapping("/upload")

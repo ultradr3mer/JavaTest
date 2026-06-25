@@ -1,4 +1,4 @@
-package com.skillmanager.repository;
+package com.skillmanager.model;
 
 import java.util.HashMap;
 import java.util.Map;
