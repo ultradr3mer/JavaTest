@@ -1,68 +1,68 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 
 export default function App() {
-  const [count, setCount] = useState(0)
+  const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState(null)
   const [error, setError] = useState(null)
 
-  async function fetchCount() {
-    try {
-      const res = await fetch('/api/counter')
-      if (!res.ok) throw new Error('Fehler beim Laden')
-      const data = await res.json()
-      setCount(data.count)
-    } catch (e) {
-      setError(e.message)
-    }
+  function handleFileChange(e) {
+    const selected = e.target.files?.[0]
+    setFile(selected)
+    setMessage(null)
+    setError(null)
   }
 
-  async function increment() {
+  async function handleUpload() {
+    if (!file) {
+      setError('Bitte zuerst eine ZIP-Datei auswählen.')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
     setLoading(true)
+    setMessage(null)
     setError(null)
     try {
-      const res = await fetch('/api/counter/increment', { method: 'POST' })
-      if (!res.ok) throw new Error('Fehler beim Hochzählen')
-      const data = await res.json()
-      setCount(data.count)
+      const res = await fetch('/api/skill/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const text = await res.text()
+      if (!res.ok) throw new Error(text || 'Fehler beim Upload')
+      setMessage(text)
     } catch (e) {
       setError(e.message)
     } finally {
       setLoading(false)
     }
   }
-
-  async function reset() {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/counter/reset', { method: 'POST' })
-      if (!res.ok) throw new Error('Fehler beim Zurücksetzen')
-      const data = await res.json()
-      setCount(data.count)
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchCount()
-  }, [])
 
   return (
     <main className="app">
-      <h1>Counter Demo</h1>
-      <p className="count">Aktueller Zähler: <strong>{count}</strong></p>
-      <div className="buttons">
-        <button onClick={increment} disabled={loading}>
-          {loading ? '...' : 'Hochzählen'}
-        </button>
-        <button onClick={reset} disabled={loading}>
-          Zurücksetzen
+      <h1>Skill ZIP-Upload</h1>
+
+      <div className="upload">
+        <input
+          type="file"
+          accept=".zip,application/zip"
+          onChange={handleFileChange}
+        />
+        <button onClick={handleUpload} disabled={loading || !file}>
+          {loading ? 'Lädt...' : 'Hochladen'}
         </button>
       </div>
+
+      {file && (
+        <p className="file-info">
+          Ausgewählt: <strong>{file.name}</strong> ({(file.size / 1024).toFixed(1)} KB)
+        </p>
+      )}
+
+      {message && <p className="success">{message}</p>}
       {error && <p className="error">{error}</p>}
     </main>
   )

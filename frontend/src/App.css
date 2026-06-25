@@ -4,36 +4,35 @@
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   text-align: center;
-  max-width: 400px;
+  max-width: 480px;
   width: 100%;
 }
 
 h1 {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   color: #1a1a1a;
 }
 
-.count {
-  font-size: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.count strong {
-  font-size: 1.75rem;
-  color: #646cff;
-}
-
-.buttons {
+.upload {
   display: flex;
-  gap: 0.75rem;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+input[type="file"] {
+  font-size: 0.95rem;
+  padding: 0.5rem;
+  border: 1px dashed #b0b0b0;
+  border-radius: 8px;
+  background: #fafafa;
 }
 
 button {
   background: #646cff;
   color: white;
   border: none;
-  padding: 0.65rem 1.25rem;
+  padding: 0.7rem 1.25rem;
   font-size: 1rem;
   border-radius: 8px;
   cursor: pointer;
@@ -47,6 +46,18 @@ button:hover:not(:disabled) {
 button:disabled {
   background: #a0a0a0;
   cursor: not-allowed;
+}
+
+.file-info {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.success {
+  margin-top: 1rem;
+  color: #2a8a2a;
+  font-weight: 600;
 }
 
 .error {
