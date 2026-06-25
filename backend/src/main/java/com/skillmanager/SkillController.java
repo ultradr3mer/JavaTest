@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.skillmanager;
 
 import java.io.IOException;
 
