@@ -15,11 +15,14 @@ import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import com.skillmanager.data.SkillGetData;
 import com.skillmanager.model.SkillMdHeaderParser;
+import java.util.stream.Stream;
 
 @Repository
 public class SkillRepo {
 
+    private static final String SKILL_MD = "skill.md";
     @Value("${skill.path}")
     private String skillPath;
 
@@ -44,12 +47,12 @@ public class SkillRepo {
             }
 
             String entryName = entry.getName();
-            if(!entryName.toLowerCase().endsWith(".md")) {
+            if (!entryName.toLowerCase().endsWith(".md")) {
                 continue;
             }
 
             String content = new String(zis.readAllBytes());
-            if (Paths.get(entryName).getFileName().toString().equalsIgnoreCase("skill.md")) {
+            if (Paths.get(entryName).getFileName().toString().equalsIgnoreCase(SKILL_MD)) {
                 try {
                     SkillMdHeaderParser.Parse(content);
                 } catch (SkillMdHeaderParser.InvalidHeaderException e) {
@@ -69,10 +72,10 @@ public class SkillRepo {
             Path zipEntryDir = entryPath.getParent();
             Files.createDirectories(zipEntryDir);
 
-            Files.writeString(entryPath, 
-                            content, 
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING);
+            Files.writeString(entryPath,
+                    content,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
 
             zis.closeEntry();
         }
@@ -83,7 +86,8 @@ public class SkillRepo {
         }
     }
 
-    public Map<String, Map<String, String>> getAllSkills() throws IOException, SkillMdHeaderParser.InvalidHeaderException {
+    public Map<String, Map<String, String>> getAllSkills()
+            throws IOException, SkillMdHeaderParser.InvalidHeaderException {
         Path baseDir = Paths.get(skillPath).toAbsolutePath().normalize();
         Map<String, Map<String, String>> skills = new HashMap<>();
 
@@ -93,7 +97,7 @@ public class SkillRepo {
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(baseDir, Files::isDirectory)) {
             for (Path skillDir : stream) {
-                Path skillMd = skillDir.resolve("skill.md");
+                Path skillMd = skillDir.resolve(SKILL_MD);
                 if (!Files.isRegularFile(skillMd)) {
                     throw new IOException("Fehlende skill.md-Datei im Verzeichnis: " + skillDir.toString());
                 }
@@ -104,5 +108,26 @@ public class SkillRepo {
         }
 
         return skills;
+    }
+
+    public SkillGetData getSkill(String skillName) throws IOException, SkillMdHeaderParser.InvalidHeaderException {
+        Path skillDir = Paths.get(skillPath, skillName).toAbsolutePath().normalize();
+        var files = new HashMap<String, String>();
+        Map<String, String> header = null;
+        try (Stream<Path> paths = Files.walk(skillDir)) {
+            for (Path path : (Iterable<Path>) paths::iterator) {
+                if (!Files.isRegularFile(path)) {
+                    continue;
+                }
+
+                String content = Files.readString(path);
+                files.put(skillDir.relativize(path).toString(), content);
+
+                if (path.getFileName().toString().equalsIgnoreCase(SKILL_MD)) {
+                    header = SkillMdHeaderParser.Parse(content);
+                }
+            }
+        }
+        return new SkillGetData(skillName, header, files);
     }
 }

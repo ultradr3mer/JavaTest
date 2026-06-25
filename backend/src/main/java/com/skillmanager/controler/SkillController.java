@@ -6,11 +6,14 @@ import java.util.zip.ZipInputStream;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.skillmanager.data.SkillGetData;
 import com.skillmanager.repository.SkillRepo;
 
 @RestController
@@ -26,13 +29,18 @@ public class SkillController {
 
     @GetMapping
     public Map<String, Map<String, String>> getSkills() throws Exception {
-            return skillRepo.getAllSkills();
+        return skillRepo.getAllSkills();
     }
-    
+
+    @GetMapping("/{skillName}")
+    public SkillGetData getSkills(@PathVariable String skillName) throws Exception {
+        return skillRepo.getSkill(skillName);
+    }
+
     @PostMapping("/upload")
     public String uploadZip(@RequestParam("file") MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
-        if(originalFilename == null || !originalFilename.endsWith(".zip")) {
+        if (originalFilename == null || !originalFilename.endsWith(".zip")) {
             return "Ungültige Datei. Bitte eine ZIP-Datei hochladen.";
         }
 
