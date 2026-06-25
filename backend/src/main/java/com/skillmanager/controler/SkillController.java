@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.zip.ZipInputStream;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,11 @@ public class SkillController {
     public SkillController(SkillRepo skillRepo) {
         this.skillRepo = skillRepo;
     }
+
+    @GetMapping
+    public String getSkills() {
+        return "SkillController is working!";
+    }
     
     @PostMapping("/upload")
     public String uploadZip(@RequestParam("file") MultipartFile file) {
@@ -33,7 +39,8 @@ public class SkillController {
         try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
             skillRepo.StoreSkill(zis, originalFilename.replace(".zip", ""));
             return "ZIP erfolgreich verarbeitet";
-
+        } catch (SkillRepo.InvalidSkillException e) {
+            return "Ungültige ZIP-Datei: " + e.getMessage();
         } catch (IOException e) {
             return "Fehler beim Entpacken";
         }
