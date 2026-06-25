@@ -40,6 +40,13 @@ public class SkillRepo {
 
             String entryName = entry.getName();
             if (Paths.get(entryName).getFileName().toString().equalsIgnoreCase("skill.md")) {
+                try {
+                    String content = new String(zis.readAllBytes());
+                    SkillMdHeaderParser.Parse(content);
+                } catch (SkillMdHeaderParser.InvalidHeaderException e) {
+                    throw new InvalidSkillException("Ungültige skill.md-Header: " + e.getMessage());
+                }
+
                 skillMdExists = true;
             }
 
