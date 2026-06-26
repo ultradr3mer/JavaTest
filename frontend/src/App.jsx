@@ -51,6 +51,33 @@ export default function App() {
     setActiveFile(null)
   }
 
+  const [archiving, setArchiving] = useState(false)
+  const [archiveError, setArchiveError] = useState(null)
+
+  async function handleArchive() {
+    if (!selected) return
+    if (!window.confirm(`Skill "${selected}" archivieren? Das Original wird gelöscht.`)) return
+    setArchiving(true)
+    setArchiveError(null)
+    try {
+      const res = await fetch(`/api/skill/${encodeURIComponent(selected)}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Fehler beim Archivieren')
+      await loadSkills()
+      backToList()
+    } catch (e) {
+      setArchiveError(e.message)
+    } finally {
+      setArchiving(false)
+    }
+  }
+
+  function handleDownload() {
+    if (!selected) return
+    window.location.href = `/api/skill/${encodeURIComponent(selected)}/download`
+  }
+
   function handleFileChange(e) {
     const selected = e.target.files?.[0]
     setFile(selected)
@@ -112,10 +139,23 @@ export default function App() {
               {detail.header?.['argument-hint'] && (
                 <p><strong>Argument-Hint:</strong> {detail.header['argument-hint']}</p>
               )}
+              {archiveError && <p className="error">{archiveError}</p>}
             </div>
 
             <div className="detail-body">
               <aside className="file-list">
+                <div className="file-list-actions">
+                  <button className="download-btn" onClick={handleDownload}>
+                    Download (ZIP)
+                  </button>
+                  <button
+                    className="archive-btn"
+                    onClick={handleArchive}
+                    disabled={archiving}
+                  >
+                    {archiving ? 'Archiviere...' : 'Archivieren'}
+                  </button>
+                </div>
                 <h3>Dateien</h3>
                 <ul>
                   {Object.keys(detail.files || {}).map((f) => (
