@@ -44,6 +44,10 @@ public class SkillRepo {
         Path baseDir = Paths.get(skillPath).toAbsolutePath().normalize();
         Path skillDir = baseDir.resolve(skillName).normalize();
 
+        if (Files.isDirectory(skillDir)) {
+            throw new InvalidSkillException("Skill existiert bereits: " + skillName);
+        }
+
         Files.createDirectories(baseDir);
 
         boolean skillMdExists = false;

@@ -79,7 +79,7 @@ public class SkillController {
             skillRepo.storeSkill(zis, originalFilename.replace(".zip", ""));
             return "ZIP erfolgreich verarbeitet";
         } catch (SkillRepo.InvalidSkillException e) {
-            return "Ungültige ZIP-Datei: " + e.getMessage();
+            return "Fehler beim Upload: " + e.getMessage();
         } catch (IOException e) {
             return "Fehler beim Entpacken";
         }
