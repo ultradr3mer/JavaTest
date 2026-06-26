@@ -6,11 +6,16 @@ import java.util.zip.ZipInputStream;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.skillmanager.data.SkillGetData;
@@ -37,6 +42,21 @@ public class SkillController {
         return skillRepo.getSkill(skillName);
     }
 
+    @GetMapping("/{skillName}/download")
+    public ResponseEntity<Resource> downloadSkill(@PathVariable String skillName) throws Exception {
+        byte[] zip = skillRepo.getSkillAsZip(skillName);
+        if (zip == null) {
+            return ResponseEntity.notFound().build();
+        }
+        ByteArrayResource resource = new ByteArrayResource(zip);
+        String filename = skillName + ".zip";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .contentLength(zip.length)
+                .body(resource);
+    }
+
     @PostMapping("/upload")
     public String uploadZip(@RequestParam("file") MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
@@ -45,7 +65,7 @@ public class SkillController {
         }
 
         try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
-            skillRepo.StoreSkill(zis, originalFilename.replace(".zip", ""));
+            skillRepo.storeSkill(zis, originalFilename.replace(".zip", ""));
             return "ZIP erfolgreich verarbeitet";
         } catch (SkillRepo.InvalidSkillException e) {
             return "Ungültige ZIP-Datei: " + e.getMessage();

@@ -1,5 +1,6 @@
 package com.skillmanager.repository;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +34,7 @@ public class SkillRepo {
         }
     }
 
-    public void StoreSkill(ZipInputStream zis, String skillName) throws IOException, InvalidSkillException {
+    public void storeSkill(ZipInputStream zis, String skillName) throws IOException, InvalidSkillException {
         Path baseDir = Paths.get(skillPath).toAbsolutePath().normalize();
         Path skillDir = baseDir.resolve(skillName).normalize();
 
@@ -129,5 +131,29 @@ public class SkillRepo {
             }
         }
         return new SkillGetData(skillName, header, files);
+    }
+
+    public byte[] getSkillAsZip(String skillName)
+            throws IOException, SkillMdHeaderParser.InvalidHeaderException {
+        SkillGetData skill = getSkill(skillName);
+        return packSkillAsZip(skillName, skill.files);
+    }
+
+    public byte[] packSkillAsZip(String skillName, Map<String, String> files) throws IOException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ZipOutputStream zos = new ZipOutputStream(baos)) {
+            for (Map.Entry<String, String> entry : files.entrySet()) {
+                String entryName = entry.getKey().replace('\\', '/');
+                if (!entryName.startsWith(skillName + "/")) {
+                    entryName = skillName + "/" + entryName;
+                }
+                ZipEntry zipEntry = new ZipEntry(entryName);
+                zos.putNextEntry(zipEntry);
+                zos.write(entry.getValue().getBytes());
+                zos.closeEntry();
+            }
+            zos.finish();
+            return baos.toByteArray();
+        }
     }
 }
