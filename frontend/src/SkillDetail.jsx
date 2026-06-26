@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
 import './SkillDetail.css'
 
 export default function SkillDetail() {
@@ -53,6 +54,10 @@ export default function SkillDetail() {
   function handleDownload() {
     if (!skillName) return
     window.location.href = `/api/skill/${encodeURIComponent(skillName)}/download`
+  }
+
+  function isMarkdown(name) {
+    return /\.(md|markdown)$/i.test(name)
   }
 
   if (loadError) {
@@ -111,7 +116,13 @@ export default function SkillDetail() {
 
           <article className="file-content">
             {activeFile && detail.files?.[activeFile] != null ? (
-              <pre>{detail.files[activeFile]}</pre>
+              isMarkdown(activeFile) ? (
+                <div className="markdown-body">
+                  <ReactMarkdown>{detail.files[activeFile]}</ReactMarkdown>
+                </div>
+              ) : (
+                <pre>{detail.files[activeFile]}</pre>
+              )
             ) : (
               <p className="muted">Wähle eine Datei aus.</p>
             )}
