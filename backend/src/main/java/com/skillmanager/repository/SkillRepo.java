@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -27,6 +29,9 @@ public class SkillRepo {
     private static final String SKILL_MD = "skill.md";
     @Value("${skill.path}")
     private String skillPath;
+
+    @Value("${skill.archive-path}")
+    private String archivePath;
 
     public class InvalidSkillException extends Exception {
         public InvalidSkillException(String message) {
@@ -155,5 +160,25 @@ public class SkillRepo {
             zos.finish();
             return baos.toByteArray();
         }
+    }
+
+    public void archiveSkill(String skillName)
+            throws IOException, SkillMdHeaderParser.InvalidHeaderException {
+        Path skillDir = Paths.get(skillPath, skillName).toAbsolutePath().normalize();
+        if (!Files.isDirectory(skillDir)) {
+            throw new IOException("Skill-Verzeichnis existiert nicht: " + skillDir.toString());
+        }
+
+        SkillGetData skill = getSkill(skillName);
+        byte[] zip = packSkillAsZip(skillName, skill.files);
+
+        Path archiveDir = Paths.get(archivePath).toAbsolutePath().normalize();
+        Files.createDirectories(archiveDir);
+
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+        Path archiveFile = archiveDir.resolve(skillName + "-" + timestamp + ".zip");
+        Files.write(archiveFile, zip);
+
+        FileUtils.deleteDirectory(skillDir.toFile());
     }
 }

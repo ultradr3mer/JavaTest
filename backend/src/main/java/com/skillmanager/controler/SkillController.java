@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -55,6 +56,16 @@ public class SkillController {
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .contentLength(zip.length)
                 .body(resource);
+    }
+
+    @DeleteMapping("/{skillName}")
+    public ResponseEntity<Void> archiveSkill(@PathVariable String skillName) {
+        try {
+            skillRepo.archiveSkill(skillName);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/upload")

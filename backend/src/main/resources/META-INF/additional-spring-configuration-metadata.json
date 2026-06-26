@@ -1,5 +1,12 @@
-{"properties": [{
-  "name": "skill.path",
-  "type": "java.lang.String",
-  "description": "The store path for the skill database."
-}]}
+{"properties": [
+  {
+    "name": "skill.path",
+    "type": "java.lang.String",
+    "description": "The store path for the skill database."
+  },
+  {
+    "name": "skill.archive-path",
+    "type": "java.lang.String",
+    "description": "The store path for the archived skills"
+  }
+]}
