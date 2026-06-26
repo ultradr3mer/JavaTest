@@ -60,6 +60,62 @@ export default function SkillDetail() {
     return /\.(md|markdown)$/i.test(name)
   }
 
+  function buildTree(files) {
+    const root = { name: '', children: {}, files: [] }
+    for (const path of Object.keys(files)) {
+      const parts = path.replace(/\\/g, '/').split('/')
+      let node = root
+      for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i]
+        if (!node.children[part]) {
+          node.children[part] = { name: part, children: {}, files: [] }
+        }
+        node = node.children[part]
+      }
+      node.files.push({ name: parts[parts.length - 1], path })
+    }
+    return root
+  }
+
+  function TreeNode({ node, depth, activeFile, onSelect }) {
+    const [open, setOpen] = useState(true)
+    const dirs = Object.values(node.children).sort((a, b) => a.name.localeCompare(b.name))
+    const files = [...node.files].sort((a, b) => a.name.localeCompare(b.name))
+    return (
+      <>
+        {dirs.map((dir) => (
+          <li key={'dir-' + dir.name + depth} className="tree-dir">
+            <span
+              className="tree-dir-label"
+              style={{ paddingLeft: `${depth * 14 + 4}px` }}
+              onClick={() => setOpen((o) => !o)}
+            >
+              <span className="tree-toggle">{open ? '▾' : '▸'}</span>
+              <span className="tree-icon">📁</span>
+              {dir.name}
+            </span>
+            {open && (
+              <ul className="tree-children">
+                <TreeNode node={dir} depth={depth + 1} activeFile={activeFile} onSelect={onSelect} />
+              </ul>
+            )}
+          </li>
+        ))}
+        {files.map((file) => (
+          <li
+            key={'file-' + file.path}
+            className={'tree-file' + (file.path === activeFile ? ' active' : '')}
+            style={{ paddingLeft: `${depth * 14 + 22}px` }}
+            onClick={() => onSelect(file.path)}
+          >
+            <span className="tree-icon">📄</span>
+            {file.name}
+          </li>
+        ))}
+      </>
+    )
+  }
+
   if (loadError) {
     return <main className="content"><p className="error">{loadError}</p></main>
   }
@@ -101,16 +157,13 @@ export default function SkillDetail() {
               </button>
             </div>
             <h3>Dateien</h3>
-            <ul>
-              {Object.keys(detail.files || {}).map((f) => (
-                <li
-                  key={f}
-                  className={f === activeFile ? 'active' : ''}
-                  onClick={() => setActiveFile(f)}
-                >
-                  {f}
-                </li>
-              ))}
+            <ul className="tree-root">
+              <TreeNode
+                node={buildTree(detail.files || {})}
+                depth={0}
+                activeFile={activeFile}
+                onSelect={setActiveFile}
+              />
             </ul>
           </aside>
 

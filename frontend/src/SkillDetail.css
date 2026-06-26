@@ -63,7 +63,7 @@
 }
 
 .file-list li {
-  padding: 0.5rem 0.75rem;
+  padding: 0.3rem 0.5rem;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -78,6 +78,66 @@
 .file-list li.active {
   background: #646cff;
   color: #fff;
+}
+
+.tree-root,
+.tree-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tree-dir {
+  padding: 0;
+}
+
+.tree-dir-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  user-select: none;
+}
+
+.tree-dir-label:hover {
+  background: #f0f0f5;
+}
+
+.tree-toggle {
+  display: inline-block;
+  width: 12px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.tree-file {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.tree-file:hover {
+  background: #f0f0f5;
+}
+
+.tree-file.active {
+  background: #646cff;
+  color: #fff;
+}
+
+.tree-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 .file-content {
