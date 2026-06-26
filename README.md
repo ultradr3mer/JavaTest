@@ -68,6 +68,21 @@ Vite leitet alle `/api/*`-Anfragen an das Backend auf Port 8081 weiter
 (siehe `frontend/vite.config.js`). Zusätzlich ist `@CrossOrigin` im Controller
 auf `http://localhost:5173` gesetzt.
 
+## Screenshots
+
+### Startseite – Skill-Übersicht
+
+![Startseite](Screenshot1.png)
+
+Die Startseite zeigt alle verfügbaren Skills als Karten mit Name und Beschreibung.
+
+### Skill-Detailansicht
+
+![Skill-Detail](Screenshot2.png)
+
+Die Detailansicht zeigt Skill-Name, Beschreibung und weitere Header-Werte
+sowie den Dateibaum mit den Dateiinhalten (Markdown wird gerendert).
+
 ## Nutzung
 
 1. Beide Server starten (Backend + Frontend).

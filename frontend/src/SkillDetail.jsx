@@ -21,7 +21,9 @@ export default function SkillDetail() {
       if (!res.ok) throw new Error('Fehler beim Laden des Skills')
       const data = await res.json()
       setDetail(data)
-      const firstFile = Object.keys(data.files || {})[0]
+      const fileNames = Object.keys(data.files || {})
+      const skillMd = fileNames.find((n) => /(^|[\\/])skill\.md$/i.test(n))
+      const firstFile = skillMd || fileNames[0]
       if (firstFile) setActiveFile(firstFile)
     } catch (e) {
       setLoadError(e.message)
