@@ -70,7 +70,7 @@ export default function SkillDetail() {
 
   return (
     <main className="content">
-      <section className="detail">
+      <section className="detail-container">
         <button className="back-btn" onClick={() => navigate('/')}>
           &larr; Zurück
         </button>

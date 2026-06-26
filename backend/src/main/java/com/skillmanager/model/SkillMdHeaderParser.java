@@ -11,7 +11,7 @@ public class SkillMdHeaderParser {
         }
     }
 
-    public static Map<String, String> Parse(String content) throws InvalidHeaderException {
+    public static ParseResult Parse(String content) throws InvalidHeaderException {
         Map<String, String> headers = new HashMap<>();
 
         if (content == null || content.isBlank()) {
@@ -33,9 +33,9 @@ public class SkillMdHeaderParser {
             throw new InvalidHeaderException("Frontmatter-Block ist nicht geschlossen (--- fehlt).");
         }
 
-        String frontmatter = trimmed.substring(start, end);
+        String headerString = trimmed.substring(start, end);
 
-        for (String line : frontmatter.split("\n")) {
+        for (String line : headerString.split("\n")) {
             int colon = line.indexOf(':');
             if (colon == -1) {
                 continue;
@@ -54,6 +54,11 @@ public class SkillMdHeaderParser {
             throw new InvalidHeaderException("Frontmatter fehlt erforderliches Feld: description");
         }
 
-        return headers;
+        int contentStart = end + "\n---".length();
+        String contentWithoutHeader = contentStart < trimmed.length()
+                ? trimmed.substring(contentStart).stripLeading()
+                : "";
+                
+        return new ParseResult(headers, contentWithoutHeader);
     }
 }

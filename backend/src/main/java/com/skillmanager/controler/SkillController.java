@@ -40,7 +40,7 @@ public class SkillController {
 
     @GetMapping("/{skillName}")
     public SkillGetData getSkills(@PathVariable String skillName) throws Exception {
-        return skillRepo.getSkill(skillName);
+        return skillRepo.getSkill(skillName, true);
     }
 
     @GetMapping("/{skillName}/download")

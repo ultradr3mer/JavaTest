@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import com.skillmanager.data.SkillGetData;
+import com.skillmanager.model.ParseResult;
 import com.skillmanager.model.SkillMdHeaderParser;
 import java.util.stream.Stream;
 
@@ -109,15 +110,16 @@ public class SkillRepo {
                     throw new IOException("Fehlende skill.md-Datei im Verzeichnis: " + skillDir.toString());
                 }
                 String content = Files.readString(skillMd);
-                Map<String, String> headers = SkillMdHeaderParser.Parse(content);
-                skills.put(skillDir.getFileName().toString(), headers);
+                ParseResult parseResult = SkillMdHeaderParser.Parse(content);
+                skills.put(skillDir.getFileName().toString(), parseResult.getHeaders());
             }
         }
 
         return skills;
     }
 
-    public SkillGetData getSkill(String skillName) throws IOException, SkillMdHeaderParser.InvalidHeaderException {
+    public SkillGetData getSkill(String skillName, boolean stripHeader)
+            throws IOException, SkillMdHeaderParser.InvalidHeaderException {
         Path skillDir = Paths.get(skillPath, skillName).toAbsolutePath().normalize();
         var files = new HashMap<String, String>();
         Map<String, String> header = null;
@@ -128,11 +130,16 @@ public class SkillRepo {
                 }
 
                 String content = Files.readString(path);
-                files.put(skillDir.relativize(path).toString(), content);
 
                 if (path.getFileName().toString().equalsIgnoreCase(SKILL_MD)) {
-                    header = SkillMdHeaderParser.Parse(content);
+                    ParseResult parseResult = SkillMdHeaderParser.Parse(content);
+                    header = parseResult.getHeaders();
+                    if (stripHeader) {
+                        content = parseResult.getContentWithoutHeader();
+                    }
                 }
+
+                files.put(skillDir.relativize(path).toString(), content);
             }
         }
         return new SkillGetData(skillName, header, files);
@@ -140,7 +147,7 @@ public class SkillRepo {
 
     public byte[] getSkillAsZip(String skillName)
             throws IOException, SkillMdHeaderParser.InvalidHeaderException {
-        SkillGetData skill = getSkill(skillName);
+        SkillGetData skill = getSkill(skillName, false);
         return packSkillAsZip(skillName, skill.files);
     }
 
@@ -169,7 +176,7 @@ public class SkillRepo {
             throw new IOException("Skill-Verzeichnis existiert nicht: " + skillDir.toString());
         }
 
-        SkillGetData skill = getSkill(skillName);
+        SkillGetData skill = getSkill(skillName, false);
         byte[] zip = packSkillAsZip(skillName, skill.files);
 
         Path archiveDir = Paths.get(archivePath).toAbsolutePath().normalize();

@@ -236,3 +236,9 @@
 .archive-btn:hover:not(:disabled) {
   background: #a93226;
 }
+
+.detail-container {
+    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+}
